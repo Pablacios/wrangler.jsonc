@@ -1,0 +1,362 @@
+/* Marea de Verrath — mobiliario del mundo como pixel art
+   Una sola rejilla por elemento; tres paletas, una por distrito. El motor de
+   sprites pone contorno, luz y sombra, así que los props casan con los
+   personajes en vez de parecer cajas de color. */
+(function(){
+  "use strict";
+  var V = window.V;
+  var def = V.px.def;
+
+  /* chars: l=hoja  t=tronco  s=piedra  w=madera  i=hierro  f=llama
+            c=cultivo  o=tierra  b=hueso  x=tela  g=oro  v=cristal */
+  var G = {
+    arbol:[
+      "..........llllllll..........",
+      "........llllllllllll........",
+      "......llllllllllllllll......",
+      ".....llllllllllllllllll.....",
+      "....llllllllllllllllllll....",
+      "...llllllllllllllllllllll...",
+      "..llllllllllllllllllllllll..",
+      "..llllllllllllllllllllllll..",
+      ".llllllllllllllllllllllllll.",
+      ".llllllll..llllll..lllllllll",
+      "llllllll....llll....llllllll",
+      "llllllllll.llllll.llllllllll",
+      "llllllllllllllllllllllllllll",
+      ".llllllllllllllllllllllllll.",
+      ".lllllll..llllllll..llllllll",
+      "..llllll...llllll...llllll..",
+      "..llllllll.llllll.llllllll..",
+      "...llllllllllllllllllllll...",
+      "....llllllllllllllllllll....",
+      ".....llllllllllllllllll.....",
+      "......llllllllllllllll......",
+      ".......llllllllllllll.......",
+      ".........llllllllll.........",
+      "...........tttttt...........",
+      "...........tttttt...........",
+      "...........tttttt...........",
+      "...........tttttt...........",
+      "..........tttttttt..........",
+      "..........tttttttt..........",
+      ".........tttttttttt.........",
+      "........tttttttttttt........",
+      "......ttttttttttttttt.......",
+      "............................"
+    ],
+    arbolSeco:[
+      "..........t.......t.........",
+      ".........tt.......tt........",
+      "........tt.........tt.......",
+      ".......tt....tt....ttt......",
+      "......ttt....tt.....tt......",
+      ".....tt......tt......tt.....",
+      "....tt.......tt.......ttt...",
+      "...tt........tt.........tt..",
+      "..tt.........tt..........tt.",
+      ".tt..........tt...........t.",
+      "t............tt.............",
+      ".............tt.............",
+      "......tt.....tt....tt.......",
+      ".......ttt...tt...ttt.......",
+      "........tt...tt...tt........",
+      ".........ttttttttt..........",
+      "...........ttttt............",
+      "...........ttttt............",
+      "...........ttttt............",
+      "..........ttttttt...........",
+      "..........ttttttt...........",
+      ".........ttttttttt..........",
+      "........ttttttttttt.........",
+      "......ttttttttttttttt.......",
+      "............................"
+    ],
+    matorral:[
+      "........llllll........",
+      "......llllllllll......",
+      ".....llllllllllll.....",
+      "....llllllllllllll....",
+      "...llllll..lllllll....",
+      "..lllllll..llllllll...",
+      "..llllllllllllllllll..",
+      ".llllllllllllllllllll.",
+      ".lllllll..lllll.lllll.",
+      "..llllllllllllllllll..",
+      "...llllllllllllllll...",
+      "....llllllllllllll....",
+      "......llllllllll......",
+      "......................"
+    ],
+    roca:[
+      "......ssssss......",
+      "....ssssssssss....",
+      "...ssssssssssss...",
+      "..ssssssssssssss..",
+      ".ssssssssssssssss.",
+      "ssssssss..ssssssss",
+      "sssssss....sssssss",
+      "ssssssssssssssssss",
+      ".ssssssssssssssss.",
+      "..ssssssssssssss..",
+      "...ssssssssssss...",
+      ".....ssssssss.....",
+      ".................."
+    ],
+    vallaH:[
+      "................................",
+      "..ww........................ww..",
+      "..ww........................ww..",
+      "..wwwwwwwwwwwwwwwwwwwwwwwwwwww..",
+      "..wwwwwwwwwwwwwwwwwwwwwwwwwwww..",
+      "..ww........................ww..",
+      "..ww........................ww..",
+      "..wwwwwwwwwwwwwwwwwwwwwwwwwwww..",
+      "..wwwwwwwwwwwwwwwwwwwwwwwwwwww..",
+      "..ww........................ww..",
+      "..ww........................ww..",
+      "..ww........................ww..",
+      "................................"
+    ],
+    vallaV:[
+      "..............",
+      "...wwwwwwww...",
+      "...wwwwwwww...",
+      "......ww......",
+      "......ww......",
+      "......ww......",
+      "...wwwwwwww...",
+      "...wwwwwwww...",
+      "......ww......",
+      "......ww......",
+      "......ww......",
+      "......ww......",
+      "...wwwwwwww...",
+      "...wwwwwwww...",
+      "......ww......",
+      "......ww......",
+      ".............."
+    ],
+    lapida:[
+      "....ssssssss....",
+      "..ssssssssssss..",
+      ".ssssssssssssss.",
+      "ssssssssssssssss",
+      "ssss........ssss",
+      "sss..ssssss..sss",
+      "sss..ssssss..sss",
+      "ssss........ssss",
+      "ssssssssssssssss",
+      "ssssssssssssssss",
+      "ssss..ssss..ssss",
+      "ssssssssssssssss",
+      "ssssssssssssssss",
+      ".ssssssssssssss.",
+      "ssssssssssssssss",
+      "ssssssssssssssss",
+      "................"
+    ],
+    cruz:[
+      ".....ssss.....",
+      ".....ssss.....",
+      ".....ssss.....",
+      ".....ssss.....",
+      "ssssssssssssss",
+      "ssssssssssssss",
+      "ssssssssssssss",
+      ".....ssss.....",
+      ".....ssss.....",
+      ".....ssss.....",
+      ".....ssss.....",
+      ".....ssss.....",
+      ".....ssss.....",
+      "....ssssss....",
+      "...ssssssss...",
+      ".............."
+    ],
+    cultivo:[
+      "oooooooooooooooooooooooooooooo",
+      "oooooooooooooooooooooooooooooo",
+      "oo..cc......cc......cc......oo",
+      "oo.cccc....cccc....cccc.....oo",
+      "oo..cc......cc......cc......oo",
+      "ooc.cc.c..c.cc.c..c.cc.c....oo",
+      "oo.ccc....cccc.....ccc......oo",
+      "oo..cc......cc......cc......oo",
+      "oo..cc......cc......cc......oo",
+      "oo..cc......cc......cc......oo",
+      "oooooooooooooooooooooooooooooo",
+      "oooooooooooooooooooooooooooooo"
+    ],
+    farola:[
+      "....iiiiiiii....",
+      "...iiiiiiiiii...",
+      "...iiffffffii...",
+      "...iiffffffii...",
+      "...iiffffffii...",
+      "...iiiiiiiiii...",
+      "......iiii......",
+      "......iiii......",
+      "......iiii......",
+      "......iiii......",
+      "......iiii......",
+      "......iiii......",
+      "......iiii......",
+      "......iiii......",
+      "......iiii......",
+      "......iiii......",
+      "......iiii......",
+      "......iiii......",
+      "....iiiiiiii....",
+      "...iiiiiiiiii...",
+      "................"
+    ],
+    cirio:[
+      "......ff......",
+      ".....ffff.....",
+      "......ff......",
+      "....bbbbbb....",
+      "....bbbbbb....",
+      "....bbbbbb....",
+      "....bbbbbb....",
+      "....bbbbbb....",
+      "....bbbbbb....",
+      "....bbbbbb....",
+      "...ssssssss...",
+      "..ssssssssss..",
+      ".ssssssssssss.",
+      ".............."
+    ],
+    columna:[
+      "..ssssssssssssss..",
+      ".ssssssssssssssss.",
+      "ssssssssssssssssss",
+      "...ssssssssssss...",
+      "...ss..ssss..ss...",
+      "...ss..ssss..ss...",
+      "...ss..ssss..ss...",
+      "...ss..ssss..ss...",
+      "...ss..ssss..ss...",
+      "...ss..ssss..ss...",
+      "...ss..ssss..ss...",
+      "...ss..ssss..ss...",
+      "...ss..ssss..ss...",
+      "...ss..ssss..ss...",
+      "...ssssssssssss...",
+      "ssssssssssssssssss",
+      ".ssssssssssssssss.",
+      "..ssssssssssssss..",
+      ".................."
+    ],
+    ruina:[
+      "ssss..........ssssss......",
+      "ssss...........sssss......",
+      "sssss..ssss....sssssss....",
+      "ssssssssssss...sssssss....",
+      "ssssssssssssssssssssssss..",
+      "sssssssssssssssssssssssss.",
+      "sssss....sssss....sssssss.",
+      "ssss......sss......ssssss.",
+      "ssss......sss......ssssss.",
+      "sssss....sssss....sssssss.",
+      "sssssssssssssssssssssssss.",
+      "ssssssssssssssssssssssss..",
+      ".ssssssssssssssssssssss...",
+      "..........................",
+      "..........................",
+      ".........................."
+    ],
+    colgado:[
+      ".........ww.........",
+      ".........ww.........",
+      ".........ww.........",
+      ".........ww.........",
+      ".........ww.........",
+      "........wwww........",
+      "......bbbbbbbb......",
+      ".....bbbbbbbbbb.....",
+      ".....bb..bb..bb.....",
+      ".....bbbbbbbbbb.....",
+      "......bbbbbbbb......",
+      ".......bbbbbb.......",
+      "....xxxxxxxxxxxx....",
+      "...xxxxxxxxxxxxxx...",
+      "...xxxxxxxxxxxxxx...",
+      "....xxxxxxxxxxxx....",
+      "....xxxxxxxxxxxx....",
+      ".....xxxxxxxxxx.....",
+      ".....xxxx..xxxx.....",
+      ".....xxx....xxx.....",
+      "......xx....xx......",
+      "......xx....xx......",
+      "...................."
+    ],
+    pozo:[
+      "...ssssssssssss...",
+      "..ssssssssssssss..",
+      ".ssssssssssssssss.",
+      ".ss............ss.",
+      ".ss............ss.",
+      ".ssssssssssssssss.",
+      "ssssssssssssssssss",
+      "ssssssssssssssssss",
+      ".ssssssssssssssss.",
+      ".ssssssssssssssss.",
+      "..ssssssssssssss..",
+      "..................",
+      "..................",
+      ".................."
+    ],
+    hierba:[
+      "..l...l.....",
+      ".ll..lll..l.",
+      ".l...ll..ll.",
+      "l....l...l..",
+      "............"
+    ],
+    flor:[
+      "..ff..",
+      ".ffff.",
+      "..ff..",
+      "..ll..",
+      "..ll..",
+      "......"
+    ],
+    guijarro:[
+      "..ss..ss....",
+      ".ssss.ssss..",
+      "..ss..ss....",
+      "............"
+    ]
+  };
+
+  // char -> color, sacado de la paleta del distrito
+  function palFor(P){
+    return {
+      l:P.leaf, t:P.trunk, s:P.stone, w:P.wood, i:P.iron, f:P.flame,
+      c:P.crop, o:P.soil, b:P.wax, x:P.cloth, g:"#E5B95C", v:P.win
+    };
+  }
+  var GRASS_KEYS = {hierba:"tuft", flor:"fl1", guijarro:"stone"};
+
+  V.buildProps = function(stageKey, P){
+    var pal = palFor(P);
+    for(var k in G){
+      var key = "p_"+stageKey+"_"+k;
+      if(V.px.bank[key]) continue;
+      var opt = {anim:false};
+      if(k==="arbol"||k==="arbolSeco"||k==="lapida"||k==="cruz"||k==="colgado"||
+         k==="farola"||k==="columna"||k==="matorral"||k==="roca"||k==="pozo"||k==="ruina")
+        opt.shadow = true;
+      var pp = pal;
+      if(k==="hierba") pp = {l:P.tuft};
+      else if(k==="flor") pp = {f:P.fl1, l:P.tuftD};
+      else if(k==="guijarro") pp = {s:P.stone};
+      V.px.def(key, pp, G[k], opt);
+    }
+    // variante de flor en el segundo color
+    var fk = "p_"+stageKey+"_flor2";
+    if(!V.px.bank[fk]) V.px.def(fk, {f:P.fl2, l:P.tuftD}, G.flor, {anim:false});
+  };
+  V.PROP_GRIDS = G;
+})();
