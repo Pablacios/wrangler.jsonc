@@ -1,0 +1,27 @@
+{
+  "name": "marea-de-verrath",
+  "main": "worker.js",
+  "compatibility_date": "2025-05-01",
+
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
+
+  "durable_objects": {
+    "bindings": [
+      { "name": "SALA", "class_name": "Sala" }
+    ]
+  },
+
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["Sala"]
+    }
+  ],
+
+  "observability": {
+    "enabled": true
+  }
+}
