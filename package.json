@@ -1,0 +1,7 @@
+{
+  "name": "marea-de-verrath",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy"
+  }
+}
